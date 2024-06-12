@@ -70,6 +70,7 @@ rom_menu()
         page="${full_page}${EMU}"
         base_url="${SRC%% *}"
         ext="${SRC##* }"
+        rom_name_ptrn="$2"
 
         if [ "$1" = "search" ]; then
             clear
@@ -77,8 +78,6 @@ rom_menu()
             ${echo_cmd} "<X>: Keyboard\n<A>: Keypress\n<L1>: Shift\n<R1>: Backspace\n\n"
             readline -m "Search $EMU ROMs by grep pattern: "
             rom_name_ptrn=$( cat /tmp/readline.txt )
-        elif [ "$1" = "search results" ]; then
-            rom_name_ptrn="$2"
         fi
 
         if ! [ -f ${page} ] || ! [ -s ${page} ]; then
@@ -98,22 +97,21 @@ rom_menu()
                      decode_url | \
                      tee ${rom_names_file} )
 
-        [ "${1%% *}" = "search" ] && [ "$2" != "" ] && rom_names=$( grep ${rom_name_ptrn} ${rom_names_file} )
+        [ "${rom_name_ptrn}" != "" ] && rom_names=$( grep ${rom_name_ptrn} ${rom_names_file} )
 
         if [ -z "$rom_names" ]; then
-            pick=$( ${echo_cmd} "<OK>\n" | \
-                    ${scriptdir}/shellect.sh -b "${bline}" -t "          $EMU ROMs not found " )
-            [ "$pick" = "<OK>" ] && return
-                sleep 10
-                return
+            echo
+            echo "No ${EMU} roms found matching pattern: '${rom_name_ptrn}'"
+            sleep 3
+            rom_menu "search" && return
         fi
 
         pick=$( ${echo_cmd} "<Search>\n<Reload>\n<Back>\n$rom_names" | \
                 ${scriptdir}/shellect.sh -b "${bline}" -t "       [ Matching $EMU ROMS ] " )
 
-        [ "$pick" = "<Back>" ] && return
+        [ "$pick" = "<Back>" ] && clear && return
         [ "$pick" = "<Search>" ] && rom_menu "search" && return
-        [ "$pick" = "<Reload>" ] && ( rm ${page}; rom_menu "browse" ) && return
+        [ "$pick" = "<Reload>" ] && ( rm ${page}; rom_menu "search result" "${rom_name_ptrn}" ) && return
 
         rom_name=$( sed -n "$( grep -n "$pick" ${rom_names_file} | cut -d: -f1){p;q}" ${orig_rom_names_file} )
         rom_dir="${romsdir}/$EMU"
@@ -127,7 +125,7 @@ rom_menu()
 
         # rm -f ${rom_names_file} ${orig_rom_names_file}
 
-        sleep 5
+        sleep 3
         rom_menu "search result" "${rom_name_ptrn}" && return
     done
 }
@@ -171,7 +169,7 @@ main_menu()
 
         [ "$pick" = "$opt1" ] && rom_menu "browse"
         [ "$pick" = "$opt2" ] && rom_menu "search"
-        [ "$pick" = "$opt3" ] && ${scriptdir}/reset_list.sh "${romsdir}/${EMU}" && echo "${EMU} romdir cache cleared."; sleep 2
+        [ "$pick" = "$opt3" ] && ${scriptdir}/reset_list.sh "${romsdir}/${EMU}" && echo "${EMU} romdir cache cleared."; sleep 3
         [ "$pick" = "$opt4" ] && emu_menu
         [ "$pick" = "$opt5" ] && exit
 
