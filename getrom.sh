@@ -76,8 +76,8 @@ rom_menu()
         if [ "${mode}" = "search" ]; then
             clear
             echo -ne "\e[?25h"  # cursor
-            ${echo_cmd} "(X): Keyboard\n(A): Keypress\n[L1]: Shift\n[R1]: Backspace\n[L2]: Left\n[R2]: Right\n/Start/: Enter\n\n"
-            readline -m "Search ${EMU} ROMs by grep pattern: "
+            ${echo_cmd} "(X): Show keyboard\n(Y): Keyboard position\n(A): Keypress\n(B): Toggle\n[L1]: Shift\n[R1]: Backspace\n[L2]: Left\n[R2]: Right\n/Se/: Tab\n/St/: Enter\n\n"
+            readline -m "Search ${EMU} ROMs matching pattern: "
             rom_name_ptrn=$( cat /tmp/readline.txt )
             [ "${rom_name_ptrn}" = "" ] && return
         fi
