@@ -1,6 +1,6 @@
 #!/bin/sh
 # This file goes to /App/romscripts
-scriptlabel="Get %LIST% rom"
+scriptlabel="Get ROM for %LIST%"
 require_networking=1
 echo $0 $*
 

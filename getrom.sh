@@ -110,7 +110,7 @@ rom_menu()
         fi
 
         pick=$( ${echo_cmd} "<Search>\n<Reload>\n<Back>\n<Exit>\n${rom_names}\n\n" | \
-                ${scriptdir}/shellect.sh -b "${bline}" -t "       [ Matching $EMU ROMS ] " )
+                ${scriptdir}/shellect.sh -b "${bline}" -t "     [ ${EMU} roms matching '${rom_name_ptrn}' ] " )
 
         clear
         [ "$pick" = "<Back>" ] && return
