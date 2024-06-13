@@ -2,13 +2,19 @@
 # This file goes to /.tmp_update/script
 
 sysdir="/mnt/SDCARD/.tmp_update"
+echo_cmd="echo -e"
+
+# Test:
+# echo_cmd="echo"
 # sysdir="../"
+
 scriptdir="${sysdir}/script"
 romsdir="/mnt/SDCARD/Roms"
 workdir="/tmp"
-full_page=${workdir}/mmprd_full_page_
-rom_names_file=${workdir}/mmprd_rom_names.txt
-orig_rom_names_file=${workdir}/mmprd_orig_rom_names.txt
+page_prefix=${workdir}/mmpgetrom_full_page_
+rom_names_file=${workdir}/mmpgetrom_rom_names.txt
+orig_rom_names_file=${workdir}/mmpgetrom_orig_rom_names.txt
+bline="                    <Menu>: Exit        <A>: Select"
 
 PS_EUR_SOURCE='https://archive.org/download/chd_psx_eur/CHD-PSX-EUR/   chd'
 PS_USA_SOURCE='https://archive.org/download/chd_psx/CHD-PSX-USA/       chd'
@@ -23,17 +29,10 @@ PATH="$sysdir/bin:$PATH"
 LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$sysdir/lib:$sysdir/lib/parasyte"
 
 
-bline="                    <Menu>: Exit        <A>: Select"
-echo_cmd="echo -e"
-# echo_cmd="echo"
-
-
 decode_url()
 {
     local url_encoded=$(cat)
-    # Replace %20 with space
     url_decoded=$(echo "$url_encoded" | sed 's/%20/ /g')
-    # Add more replacements if needed
     url_decoded=$(echo "$url_decoded" | sed 's/%21/!/g')
     url_decoded=$(echo "$url_decoded" | sed 's/%22/"/g')
     url_decoded=$(echo "$url_decoded" | sed 's/%23/#/g')
@@ -49,7 +48,6 @@ decode_url()
     url_decoded=$(echo "$url_decoded" | sed 's/%2D/-/g')
     url_decoded=$(echo "$url_decoded" | sed 's/%2E/./g')
     url_decoded=$(echo "$url_decoded" | sed 's/%2F/\//g')
-    # Add more replacements as necessary
     echo "$url_decoded"
 }
 
@@ -71,15 +69,15 @@ rom_menu()
     while true; do
         clear; echo "Working..."
 
-        page="${full_page}${EMU}"
+        page="${page_prefix}${EMU}"
         base_url="${SRC%% *}"
         ext="${SRC##* }"
 
         if [ "${mode}" = "search" ]; then
             clear
             echo -ne "\e[?25h"  # cursor
-            ${echo_cmd} "<X>: Keyboard\n<A>: Keypress\n<L1>: Shift\n<R1>: Backspace\n<L2>: Left\n<R2>: Right\n<Start>: Enter\n\n"
-            readline -m "Search $EMU ROMs by grep pattern: "
+            ${echo_cmd} "(X): Keyboard\n(A): Keypress\n[L1]: Shift\n[R1]: Backspace\n[L2]: Left\n[R2]: Right\n/Start/: Enter\n\n"
+            readline -m "Search ${EMU} ROMs by grep pattern: "
             rom_name_ptrn=$( cat /tmp/readline.txt )
             [ "${rom_name_ptrn}" = "" ] && return
         fi
@@ -105,33 +103,33 @@ rom_menu()
 
         if [ -z "${rom_names}" ]; then
             echo
-            echo "No ${EMU} roms found matching pattern: '${rom_name_ptrn}'"
+            echo "'${rom_name_ptrn}' not found."
             mode="search"
             sleep 3
             continue
         fi
 
-        pick=$( ${echo_cmd} "<Search>\n<Reload>\n<Back>\n${rom_names}\n\n" | \
+        pick=$( ${echo_cmd} "<Search>\n<Reload>\n<Back>\n<Exit>\n${rom_names}\n\n" | \
                 ${scriptdir}/shellect.sh -b "${bline}" -t "       [ Matching $EMU ROMS ] " )
 
         clear
         [ "$pick" = "<Back>" ] && return
+        [ "$pick" = "<Exit>" ] && exit
         [ "$pick" = "<Search>" ] && mode="search" && continue
-        [ "$pick" = "<Reload>" ] && mode="search result" && rm -f ${page} && continue
+        [ "$pick" = "<Reload>" ] && mode="search result" && rm -f "${page}" && continue
 
-        rom_name=$( sed -n "$( grep -n "$pick" ${rom_names_file} | cut -d: -f1){p;q}" ${orig_rom_names_file} )
-        rom_dir="${romsdir}/$EMU"
+        rom_name=$( sed -n "$( grep -n "$pick" "${rom_names_file}" | cut -d: -f1){p;q}" "${orig_rom_names_file}" )
+        rom_dir="${romsdir}/${EMU}"
 
-        clear
-        echo "Download '$pick' to '$rom_dir'"
+        # clear
+        echo "Download '$pick' to '${rom_dir}'"
         echo
-        if ! wget -O "$pick" -P "$rom_dir/" "${base_url}$rom_name"; then
+        if ! wget -O "$pick" -P "$rom_dir/" "${base_url}${rom_name}"; then
             echo "Download failed."
         fi
 
         sleep 3
 
-        # rm -f ${rom_names_file} ${orig_rom_names_file}
         if [ -f "${scriptdir}/reset_list.sh" ]; then
             "${scriptdir}/reset_list.sh" "${romsdir}/${EMU}" >/dev/null 2>&1
         fi
@@ -146,7 +144,7 @@ emu_menu()
     clear
     emus="<Back>\nPS\nGB\nGBC\nGBA\nFC\nSFC\nMD\n\n"
     pick=$( ${echo_cmd} "$emus" | \
-            ${scriptdir}/shellect.sh -b "${bline}" -t "           [ Emulator Menu ] " )
+            ${scriptdir}/shellect.sh -b "${bline}" -t "           [ Select Emulator ] " )
     [ "$pick" = "<Back>" ] && return
     EMU=$pick
 }
@@ -165,16 +163,14 @@ main_menu()
         [ "$EMU" = "FC" ] && SRC=$FC_SOURCE
         [ "$EMU" = "SFC" ] && SRC=$SFC_SOURCE
 
-
         opt1="${SRC:+"Browse ${EMU} .${SRC##* } ROMs at $(basename ${SRC%% *})"}"
         opt2="${SRC:+"Search ${EMU} .${SRC##* } ROM at $(basename  ${SRC%% *})"}"
         opt3="${SRC:+"Clear ${EMU} romdir cache"}"
         opt4="Select ${SRC:+another }emulator"
         opt5="<Exit>"
 
-        # clear
         pick=$( ${echo_cmd} "$opt1\n$opt2\n\n$opt3\n$opt4\n$opt5\n\n" | \
-                ${scriptdir}/shellect.sh -b "${bline}" -t "              [ MAIN MENU ] " )
+                ${scriptdir}/shellect.sh -b "${bline}" -t "              [ OPTIONS ] " )
 
         [ "$pick" = "$opt1" ] && rom_menu "browse" && continue
         [ "$pick" = "$opt2" ] && rom_menu "search" && continue
@@ -187,5 +183,6 @@ main_menu()
 
 
 EMU="$1"
+[ "${EMU}" = "PSX" ] && EMU="PS"
 
 main_menu
