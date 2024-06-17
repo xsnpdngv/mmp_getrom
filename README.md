@@ -19,21 +19,21 @@ The URLs of the applied ROM source pages are as follows:
 - NES - Nintendo Entertainment System: https://archive.org/download/nointro.nes/
 - SNES - Super Nintendo Entertainment System: https://archive.org/download/nointro.snes/
 
-Feel free to modify the URLs of the game rom source pages for any emulator in `getrom.sh`.
+The URLs of the game rom source pages for any emulator in `getrom.sh` can be easily modified.
 
 
 ## Requirements
 
-- Miyoo Mini Plus console: https://www.lomiyoo.com/en/
-- Onion OS https://onionui.github.io/
+- Miyoo Mini Plus retro gaming console: https://www.lomiyoo.com/en/
+- Onion OS: https://onionui.github.io/
 - Simple Terminal application: https://onionui.github.io/docs/apps/terminal
 - Connected WiFi
 
 
 ## Install
 
-Extract `sdcard.zip` and copy its contents right to root of the SD card. It won't overwrite
-anything, just copies to shell scripts into their desired location:
+Extract `sdcard.zip` and copy its contents right to the root of the SD card. It won't overwrite
+anything, just copies the shell scripts into their desired location:
 
 - `Get_ROM.sh` to `/App/romscripts`
 - `getrom.sh` to `/.tmp_update/script`
