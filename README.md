@@ -11,13 +11,13 @@ Search available game roms on archive.org for the pre-configured rom-set page.
 
 The URLs of the applied ROM source pages are as follows:
 
-- PS - Sony Playstation: https://archive.org/download/chd_psx_eur/CHD-PSX-EUR/
+- PS - Sony PlayStation: https://archive.org/download/chd_psx_eur/CHD-PSX-EUR/
 - GB - Nintendo GameBoy: https://archive.org/download/nointro.gb/
 - GBC - Nintendo GameBoy Color: https://archive.org/download/nointro.gbc-1/
-- GBA - GabeBoy Advance: https://archive.org/download/nointro.gba/
-- MD - Sega Genesis: https://archive.org/download/nointro.md/
+- GBA - Nintendo GameBoy Advance: https://archive.org/download/nointro.gba/
 - NES - Nintendo Entertainment System: https://archive.org/download/nointro.nes/
 - SNES - Super Nintendo Entertainment System: https://archive.org/download/nointro.snes/
+- MD - Sega Genesis/Mega Drive: https://archive.org/download/nointro.md/
 
 The URLs of the game rom source pages for any emulator in `getrom.sh` can be easily modified.
 
